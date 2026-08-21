@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @custom-variant mobile (@media (max-width: 767px));
-@custom-variant tablet (@media (min-width: 768px)(max-width: 1199px));
-@custom-variant below-desktop (@media (max-width: px));
+@custom-variant tablet (@media (min-width: 768px) and (max-width: 1199px));
+@custom-variant below-desktop (@media (max-width: 1199px));
 @custom-variant tablet-up (@media (min-width: 768px));
 @custom-variant desktop (@media (min-width: 1200px));
 @custom-variant desktop-wide (@media (min-width: 1280px));

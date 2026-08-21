@@ -1,25 +1,31 @@
-"use client"
 
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { ChevronIcon } from "@/components/ui/chevron-icon";
-import { Containter } from "@/components/ui/container";
-import { Input } from "@/components/ui/Input";
-import { ReplitLogo } from "@/components/ui/replit-logo";
-import { Textarea } from "@/components/ui/Text-Area";
-import { useToast } from "@/components/ui/Toast";
+
+import { CtaSection } from "@/components/landing/cta/section";
+import { AgentSection } from "@/components/landing/agent/section";
+import { AboveTheFold } from "@/components/landing/hero/above-the-fold";
+import { HeroSection } from "@/components/landing/hero/section";
+import { PlatformSection } from "@/components/landing/platform/section";
+import { PricingPlanClient } from "@/components/landing/pricing/pricing-plans-client";
+import { PricingSection } from "@/components/landing/pricing/section";
+import { Footer } from "@/components/layout/footer";
+import { NavBar } from "@/components/layout/navbar";
+import { TestimonialSection } from "@/components/landing/testimonials/section";
 
 export default function Home() {
-  const { success, error, toast } = useToast()
   return (
-    <Containter className="mt-10">
-      <ReplitLogo size="default" />
-      <ChevronIcon direction="down" size={66}></ChevronIcon>
-      <Input type="text" placeholder="enter" className="mb-4 border" />
-      <Button onClick={() => error("Testing")}>Click me</Button>
-      <Textarea className="mt-6" placeholder="Bio"></Textarea>
-      <Badge variant="orange">Replit</Badge>
-    </Containter>
+    <>
+      <NavBar />
+      <main className="min-h-[50vh]">
+        <AboveTheFold />
+        <AgentSection />
+        <PlatformSection />
+        <TestimonialSection />
+        <PricingSection />
+        <CtaSection />
+      </main>
+      <Footer />
+    </>
+
 
   );
 }

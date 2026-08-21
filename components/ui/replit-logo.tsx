@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 type ReplitLogoProps = {
     className?: string;
-    size: "default" | "compact";
+    size?: "default" | "compact";
 }
 
 const sizeStyles = {

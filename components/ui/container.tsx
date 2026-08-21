@@ -27,7 +27,7 @@ export function HeaderContainer({
     )
 }
 
-export function Containter({
+export function Container({
     children,
     className,
     as: Tag = "div",
@@ -35,7 +35,7 @@ export function Containter({
 }: ContainerProps) {
     return (
         <Tag id={id} className={
-            cn("w-full px-4 tablet-up:px-8 desktop:col-span-12 desktop:col-start-2 desktop:px-0",
+            cn("w-full px-4 tablet-up:px-8 desktop:col-span-12 desktop:col-start-2 desktop:px-4",
                 className
             )
         }>
