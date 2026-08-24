@@ -1,0 +1,15 @@
+services: 
+  db: 
+    image: postgres:alpine
+    container_name: replit-db
+    environment:
+      POSTGRES_USER: divyanshu
+      POSTGRES_PASSWORD: secretsuper
+      POSTGRES_DB: replit
+    ports: 
+      - "5432:5432"
+    volumes: 
+     -  postgres_data:/var/lib/postgresql
+  
+volumes: 
+  postgres_data: 
