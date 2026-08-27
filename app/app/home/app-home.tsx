@@ -10,8 +10,6 @@ import { CategoryCarousel } from "@/components/shared/category-carousel";
 import { ExamplePrompts } from "@/components/shared/example-prompt";
 import { AppPromptInput } from "@/components/app/home/app-prompt-input";
 
-
-
 type AppHomeProps = {
     user?: {
         name?: string | null;
@@ -28,7 +26,6 @@ export function AppHome({
     const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
     const audostartRef = useRef(false);
-
     const displayName = getDisplayName(user?.name, user?.email);
 
     function handleCategoryToggle(category: ProjectCategory) {
@@ -38,6 +35,8 @@ export function AppHome({
     return (
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
             <div className="flex w-full flex-1 flex-col items-center justify-center px-4 py-8 tablet-up:px-8">
+
+
                 <h1 className="max-w-3xl text-center font-display text-[32px] font-normal leading-tight tracking-[-0.03] text-app-text tablet-up:text-[40px]">
                     Hi {displayName}, What do you want to make?
                 </h1>

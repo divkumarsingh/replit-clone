@@ -8,7 +8,8 @@ import { navGroups, topNavLinks } from "@/lib/landing-data";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { AgentBadge } from "../ui/AgentBadge";
-import { ReactJsxRuntime } from "next/dist/server/route-modules/app-page/vendored/rsc/entrypoints";
+import type { AuthNavUser } from "@/lib/types/account";
+import { AuthNavActions } from "../app/auth/auth-nav-actions";
 
 
 const navGhostClass = "flex h-8 items-center rounded-md px-2 text-text-secondary transition-colors hover:bg-[#e8e7e3] hover:text-[#212225]";
@@ -106,7 +107,7 @@ function MobileNavMenu({
 }: {
     open: boolean,
     onClose: () => void;
-    initialUser: null;
+    initialUser: null | AuthNavUser;
 
 }) {
     const [expandedGroup, setExpandedGroup] = useState<string | null>('Products');
@@ -183,7 +184,11 @@ function MobileNavMenu({
                     onClick={onClose}
                     className="flex h-8 items-center rounded-md bg-[#e8e7e3] px-2 text-sm text-[#212225] transition-colors hover:bg-[#e0dfdb]"
                 >Contact Sales</Link>
-                <p>Sign-up - login</p>
+                <AuthNavActions
+                    initialUser={initialUser}
+                    className=""
+                    createAccountClassName="inline-flex items-center justify-center rounded-full border-[1.5px] border-replit-orange bg-transparent px-3 py-1.5 text-[13px] font-medium tracking-[-0.02em] text-replit-orange transition-[background-color,color] duration-150 hover:bg-replit-orange hover:text-white"
+                />
             </div>
         </div>
     )
@@ -192,6 +197,8 @@ function MobileNavMenu({
 
 export function NavBar({
     initialUser = null
+}: {
+    initialUser?: AuthNavUser | null;
 }) {
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -253,11 +260,17 @@ export function NavBar({
                         </Link>
                     </nav>
                 </div>
-                <div className="flex items-center gap-2 desktop:gap-0.5 ">
+                <div className="flex items-center justify-center gap-2 desktop:gap-0.5 ">
                     <Link href="/contact/sales" className={
                         `${navGhostClass} hidden text-sm desktop:flex`
                     }>Contact Sales</Link>
-                    <p> Signup - Login </p>
+
+                    <AuthNavActions
+                        initialUser={initialUser}
+                        className=""
+                        createAccountClassName="inline-flex items-center justify-center rounded-full border-[1.5px] border-replit-orange bg-transparent px-3 py-1.5 text-[13px] font-medium tracking-[-0.02em] text-replit-orange transition-[background-color,color] duration-150 hover:bg-replit-orange hover:text-white"
+                    />
+
                     <button type="button" onClick={() => setMobileOpen(!mobileOpen)}
                         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#edece8] text-[#151618] desktop:hidden"
                         aria-expanded={mobileOpen}>
