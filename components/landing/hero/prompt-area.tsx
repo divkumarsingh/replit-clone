@@ -8,68 +8,106 @@ import { Textarea } from "@/components/ui/Text-Area";
 import { cn } from "@/lib/utils";
 import { ExamplePrompts } from "@/components/shared/example-prompt";
 import { CategoryCarousel } from "@/components/landing/hero/category-carousel"
+import { authClient } from "@/lib/auth-client";
+import { useAuthModal } from "@/components/app/auth/auth-modal-provider";
+import { useHeroPromptDraftRestore } from "@/lib/hooks/use-hero-prompt-draft";
+import { Session } from "better-auth";
+import { AppPromptInput } from "@/components/app/home/app-prompt-input";
+import { setEngine } from "crypto";
+import { persistHeroPromptState } from "@/lib/hero-prompt-draft";
+import { requestToBodyStream } from "next/dist/server/body-streams";
 
-
-function PlanIcon() {
-    return (
-        <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-        >
-            <path
-                d="M4 6h16M4 12h10M4 18h16"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-            />
-        </svg>
-    )
-}
-
-function MicIcon({ active = false }: { active?: boolean }) {
-    return (
-        <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-        >
-            <path
-                d="M12 14.5a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5.5a3 3 0 0 0 3 3Z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                fill={active ? "currentColor" : "none"}
-            />
-            <path
-                d="M6.5 11.5a5.5 5.5 0 0 0 11 0M12 17v3"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-            />
-        </svg>
-    )
-}
+const APP_AUTOSTART_URL = "/app?autostart=1";
 
 
 export function HeroPromptArea() {
     const router = useRouter();
+    const { data: session, isPending } = authClient.useSession();
+    const { openAuthModal } = useAuthModal();
     const { error: toastError } = useToast();
 
-    const [selectedCategory, setSelectedCategory] = useState<ProjectCategory | null>(null);
+    const { value, setValue, attachements, setAttachements, planMode, setPlanMode, selectedCategory, setSelectedCategory, ready } = useHeroPromptDraftRestore();
+
+    useEffect(() => {
+        if (!ready) return;
+        void persistHeroPromptState({
+            value,
+            categoryId: selectedCategory?.id ?? null,
+            planMode,
+            attachements,
+            autostart: false
+        })
+    }, [value, selectedCategory, planMode, attachements, ready])
+
+    function handleSelect(text: string) {
+        setValue(text);
+    }
 
     function handleCategoryToggle(category: ProjectCategory) {
         setSelectedCategory((current) =>
             current?.id === category.id ? null : category
         )
+    };
+
+    function openLogin() {
+        void persistHeroPromptState({
+            value,
+            categoryId: selectedCategory?.id ?? null,
+            planMode,
+            attachements,
+            autostart: false
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        params.set("auth", "login");
+        params.set("callbackUrl", APP_AUTOSTART_URL);
+        const query = params.toString();
+        window.history.replaceState(null, "", query ? `/?${query}` : "/");
+        openAuthModal("login");
+    }
+
+    async function handleStart(prompt: string) {
+        await persistHeroPromptState({
+            value: prompt,
+            categoryId: selectedCategory?.id ?? null,
+            planMode,
+            attachements,
+            autostart: true
+        })
+
+        if (isPending) return;
+
+        if (!session?.user) {
+            openLogin();
+            return;
+        }
+
+        router.push(APP_AUTOSTART_URL);
     }
     return (
         <>
             <div className="mx-auto w-full max-w-hero-prompt">
-                <div className={cn(
+                <AppPromptInput variant="landing" value={value} onChange={setValue} onSubmit={handleStart} selectedCategory={selectedCategory}
+                    onRemoveCategory={() => setSelectedCategory(null)} attachments={attachements} onAttachmentChange={setAttachements}
+                    planMode={planMode} onPlanModeChange={setPlanMode} onError={toastError} />
+            </div>
+            <div className="mx-auto mt-[17px] w-full max-w-hero-prompt tablet-up:max-w-hero-prompt-tablet">
+                {<CategoryCarousel
+                    selectedCategoryId={selectedCategory?.id ?? null}
+                    onCategoryToggle={handleCategoryToggle} />}
+            </div>
+            <div className="mx-auto mt-3.5 hidden w-full max-w-hero-prompt desktop:block">
+                <ExamplePrompts onSelect={handleSelect} />
+            </div>
+        </>
+    )
+}
+
+
+
+
+
+{/* <div className={cn(
                     "relative",
                     " rounded-[20px] border border-[#ffb199] bg-[#f3f3f1] transition-[min-height] duration-200"
                 )}>
@@ -175,16 +213,4 @@ export function HeroPromptArea() {
                             </button>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div className="mx-auto mt-[17px] w-full max-w-hero-prompt tablet-up:max-w-hero-prompt-tablet">
-                {<CategoryCarousel
-                    selectedCategoryId={selectedCategory?.id ?? null}
-                    onCategoryToggle={handleCategoryToggle} />}
-            </div>
-            <div className="mx-auto mt-3.5 hidden w-full max-w-hero-prompt desktop:block">
-                <ExamplePrompts />
-            </div>
-        </>
-    )
-}
+                </div> */}

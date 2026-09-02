@@ -20,6 +20,7 @@ model User {
   username      String?  @unique
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
+  image         String?
 
   stripeCustomeId      String? @unique @map("stripe_customer_id")
   stripeSubscriptionId String? @unique @map("stripe_subscription_id")
@@ -77,6 +78,8 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  issuer String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -224,10 +227,11 @@ enum ProjectRole {
 }
 
 model ProjectMember {
-  id        String   @id @default(cuid())
-  projectId String   @map("project_id")
-  userId    String   @map("user_id")
-  joinedAt  DateTime @default(now()) @map("joined_at")
+  id        String      @id @default(cuid())
+  projectId String      @map("project_id")
+  userId    String      @map("user_id")
+  role      ProjectRole @default(EDITOR)
+  joinedAt  DateTime    @default(now()) @map("joined_at")
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -256,12 +260,12 @@ model ProjectInvitation {
 }
 
 model UserProjectPreference {
-  id                   String   @id @default(cuid())
-  userId               String   @map("user_id")
-  projectId            String   @map("project_id")
-  isPinned             Boolean  @default(false) @map("is_pinned")
-  lastOpenedAt         DateTime @map("last_opened_at")
-  lastActiveArtifactId String   @map("last_active_artifact_id")
+  id                   String    @id @default(cuid())
+  userId               String    @map("user_id")
+  projectId            String    @map("project_id")
+  isPinned             Boolean   @default(false) @map("is_pinned")
+  lastOpenedAt         DateTime? @map("last_opened_at")
+  lastActiveArtifactId String?   @map("last_active_artifact_id")
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
