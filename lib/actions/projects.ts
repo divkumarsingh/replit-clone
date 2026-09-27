@@ -15,6 +15,8 @@ import { projectSlugFromPrompt, uniqueProjectSlug } from "../server/project-slug
 import { ArtifactType } from "../generated/prisma/client";
 import { categoryToArtifactType } from "../app-types";
 import { createTelemetry } from "better-auth";
+import { PLAN_MODE_SYSTEM_PROMPT } from "../agent/prompt";
+import { formatAttachmentManifest, savePromptAttachmentsToArtifact } from "../project-attachments";
 
 
 export async function createProjectAction(formData: FormData) {
@@ -134,7 +136,7 @@ export async function createProjectAction(formData: FormData) {
                                 ? [
                                     {
                                         role: 'SYSTEM' as const,
-                                        content: "PLAN_MODE_SYSTEM_PROMPT",
+                                        content: PLAN_MODE_SYSTEM_PROMPT,
                                     },
                                 ]
                                 : []),
@@ -160,7 +162,50 @@ export async function createProjectAction(formData: FormData) {
     });
 
     const mainArtifact = project.artifacts[0];
+    let storedAttachments: Awaited<ReturnType<typeof savePromptAttachmentsToArtifact>> = [];
 
-    //have to write code on prompting.
+    if (attachmentFiles.length > 0 && mainArtifact) {
+        storedAttachments = await savePromptAttachmentsToArtifact({
+            projectId: project.id,
+            artifactId: mainArtifact.id,
+            artifactSlug: mainArtifact.slug,
+            files: attachmentFiles
+        });
 
+        const userMessageContent = effectivePrompt + formatAttachmentManifest(storedAttachments);
+
+        const conversation = await prisma.agentConversation.findFirst({
+            where: { projectId: project.id },
+            orderBy: { createdAt: "asc" },
+            select: { id: true }
+        });
+
+        if (conversation) {
+            const userMessage = await prisma.agentMessage.findFirst({
+                where: { conversationId: conversation.id, role: "USER" },
+                orderBy: { createdAt: "asc" },
+                select: { id: true }
+            });
+
+            if (userMessage) {
+                const userMessage = await prisma.agentMessage.findFirst({
+                    where: { conversationId: conversation.id, role: "USER" },
+                    orderBy: { createdAt: "asc" },
+                    select: { id: true },
+                });
+
+                if (userMessage) {
+                    await prisma.agentMessage.update({
+                        where: { id: userMessage.id },
+                        data: {
+                            content: userMessageContent,
+                            metadata: { attachments: storedAttachments }
+                        }
+                    })
+                }
+            }
+        }
+    }
+
+    redirect(`/app/projects/${project.workspace.slug}/${project.slug}`)
 }

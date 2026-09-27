@@ -180,6 +180,11 @@ export function AppPromptInput({
 
     const isListening = false;
 
+    function handleSubmit() {
+        if (!canSubmit || disabled) return;
+        onSubmit?.(value.trim());
+    }
+
     function handleRemoveAttachment(id: string) {
         onAttachmentChange?.(attachments.filter((attachment) => (
             attachment.id !== id
@@ -257,6 +262,12 @@ export function AppPromptInput({
                             onChange={(event) => {
                                 speechPrefRef.current = event.target.value;
                                 onChange(event.target.value);
+                            }}
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter" && !event.shiftKey) {
+                                    event.preventDefault();
+                                    handleSubmit();
+                                }
                             }}
                             placeholder={
                                 isLanding
@@ -369,7 +380,9 @@ export function AppPromptInput({
                                         canSubmit
                                             ? "h-8 gap-1 bg-replit-orange px-3 text-sm font-medium text-white"
                                             : "h-8 w-8 bg-[#ffb199] text-white"
-                                    )} aria-label="Start">
+                                    )}
+                                    onClick={handleSubmit}
+                                    aria-label="Start">
                                     {canSubmit ? (
                                         <>
                                             Start
@@ -407,7 +420,9 @@ export function AppPromptInput({
                                         canSubmit
                                             ? "bg-app-text text-app-bg hover:bg-app-text-secondary"
                                             : "bg-app-surface-active text-app-text-muted"
-                                    )} aria-label="Submit prompt"
+                                    )}
+                                    onClick={handleSubmit}
+                                    aria-label="Submit prompt"
                                 >
                                     <ArrowUpIcon />
                                 </button>

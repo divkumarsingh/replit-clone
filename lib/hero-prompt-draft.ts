@@ -69,7 +69,7 @@ export function buildProjectFormData({
 }: {
     prompt: string;
     planMode: boolean;
-    categoryId: string;
+    categoryId: string | null;
     attachements: PromptAttachment[];
 }) {
     const formData = new FormData()

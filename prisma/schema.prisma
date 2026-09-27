@@ -380,9 +380,9 @@ model ProjectFile {
   artifactId String? @map("artifact_id")
   path       String
   storageKey String  @map("storage_key")
-  mimekey    String  @map("mime_type")
+  mimeType   String? @map("mime_type")
   sizeBytes  Int     @default(0) @map("size_bytes")
-  checksum   String
+  checksum   String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
